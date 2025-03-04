@@ -1,11 +1,52 @@
 <?php
-    include '../config.php';
+require '../config.php';
 
-    // Fetch menu items from the database
-    $query = "SELECT * FROM plat";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();
-    $plats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch menu items from the database
+$query = "SELECT * FROM plat";
+$stmt = $pdo->prepare($query);
+$stmt->execute();
+$plats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+//add to cart
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+if (isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+
+    $stmt = $pdo->prepare("SELECT idPlat, nomPlat, prix FROM plat WHERE idPlat = ?");
+    $stmt->execute([$id]);
+    $plat = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($plat) {
+        $item = [
+            'id' => $plat['idPlat'],
+            'name' => $plat['nomPlat'],
+            'price' => $plat['prix'],
+            'quantity' => 1
+        ];
+
+        // Check if item already exists in cart
+        $found = false;
+        foreach ($_SESSION['cart'] as &$cartItem) {
+            if ($cartItem['id'] == $item['id']) {
+                $cartItem['quantity'] += 1;
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            $_SESSION['cart'][] = $item;
+        }
+    }
+
+    // Redirect to prevent duplicate additions on refresh
+    header("Location: index.php");
+    exit();
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -49,13 +90,13 @@
                         Harnessing Research for developing Sustainable, Scalable, &
                         Impactful Solutions.
                     </p>
-                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 ">
-                        <button class="group relative w-full sm:w-auto px-6 py-3 min-w-[160px]">
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button class="group relative w-full sm:w-auto px-6 py-3 min-w-[160px] cursor-pointer">
                             <div class="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-600 rounded-lg"></div>
                             <div
                                 class="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-600 rounded-lg lg:blur-md blur-0 group-hover:opacity-60 transition-opacity duration-500">
                             </div>
-                            <div class="relative flex items-center justify-center gap-2">
+                            <div class="relative flex items-center justify-center gap-2 ">
                                 <span class="text-white font-medium">Get Started</span>
                                 <svg class="w-5 h-5 text-white transform group-hover:translate-x-1 transition-transform"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,18 +128,18 @@
 
             <h1 class="text-4xl font-bold text-center mb-8">Our Menu</h1>
 
-            <div class="flex justify-between mb-6">
+            <div class="flex justify-between">
                 <form method="GET" class="w-full flex items-center justify-center gap-4">
-                    <input type="text" name="search" placeholder="Search..." class="px-6 py-3 border rounded w-1/3"
+                    <input type="text" name="search" placeholder="Search..." class="px-6 py-3 border rounded w-[40%] "
                         value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                    <select name="filter" class="px-6 py-3 border rounded w-1/4">
+                    <select name="filter" class="px-6 py-3 border rounded w-[40%]">
                         <option value="">All</option>
                         <option value="Marocaine" <?= isset($_GET['filter']) && $_GET['filter'] == 'Marocaine' ? 'selected' : '' ?>>Marocaine</option>
                         <option value="Italienne" <?= isset($_GET['filter']) && $_GET['filter'] == 'Italienne' ? 'selected' : '' ?>>Italienne</option>
                         <option value="Asiatique" <?= isset($_GET['filter']) && $_GET['filter'] == 'Asiatique' ? 'selected' : '' ?>>Asiatique</option>
                     </select>
                     <button type="submit"
-                        class=" text-white w-1/5   text-center font-semibold px-6 py-3 rounded-md  bg-rose-700 hover:bg-rose-500">Filter</button>
+                        class="w-[20%] text-white    text-center font-semibold px-6 py-3 rounded-md  bg-rose-700 hover:bg-rose-500">Filter</button>
                 </form>
             </div>
         </section>
@@ -112,16 +153,16 @@
                             if (!empty($_GET['search']) && stripos($plat['nomPlat'], $_GET['search']) === false) {
                                 continue;
                             }
-                            if (!empty($_GET['filter']) && $plat['type_plat'] !== $_GET['filter']) {
+                            if (!empty($_GET['filter']) && $plat['TypeCuisine'] !== $_GET['filter']) {
                                 continue;
                             }
-                            ?>
-                            
+                        ?>
+
                             <!-- 1 -->
-                            <div class="flex flex-col gap-4 rounded-lg shadow-lg bg-white group" <?= $plat['type_plat'] ?>>
+                            <div class="flex flex-col gap-4 rounded-lg shadow-lg bg-white group" <?= $plat['TypeCuisine'] ?>>
                                 <!-- Card Image -->
                                 <img class="w-[16rem] h-[12rem] sm:w-[18rem] sm:h-[14rem] object-center aspect-square rounded-t-lg"
-                                    src="https://techakim.com/sam/tg/7268/li/imgs/pizza.jpg"
+                                    src=<?= $plat['image'] ?>
                                     alt="<?= htmlspecialchars($plat['nomPlat']) ?>" />
 
                                 <div class="flex flex-col">
@@ -143,11 +184,18 @@
                                     <h2 class="pl-4 text-2xl font-semibold group-hover:text-rose-600 cursor-pointer">
                                         <?= htmlspecialchars($plat['nomPlat']) ?></h2>
                                     <p class="pl-4 text-gray-800 dark:text-gray-300  mb-4">
-                                        <?= htmlspecialchars($plat['categoryPlat']) ?>
+                                        <?= htmlspecialchars($plat['categoriePlat']) ?>
                                     </p>
-                                    <button
-                                        class="border border-rose-700 cursor-pointer hover:bg-rose-700 hover:text-white w-fit ml-4 mb-6 text-xl text-rose-700  font-bold py-2 px-4  rounded-full uppercase">Order
-                                        now</button>
+                                    <?php if (isset($_SESSION['client'])): ?>
+                                        <a href="index.php?id=<?= $plat['idPlat'] ?>" class="border border-rose-700 cursor-pointer hover:bg-rose-700 hover:text-white w-fit ml-4 mb-6 text-xl text-rose-700 font-bold py-2 px-4 rounded-full uppercase">
+                                            Order Now
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="login.php" class="border border-rose-700 cursor-pointer hover:bg-rose-700 hover:text-white w-fit ml-4 mb-6 text-xl text-rose-700 font-bold py-2 px-4 rounded-full uppercase">
+                                            Order Now
+                                        </a>
+                                    <?php endif; ?>
+
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -158,6 +206,13 @@
                 </div>
             </div>
 
+        </section>
+        <section>
+            <?php
+            if (isset($_SESSION["client"])) {
+                echo "le nom de client " . $_SESSION["client"]["nomCl"] . " " . $_SESSION["client"]["prenomCl"];
+            }
+            ?>
         </section>
     </main>
 
