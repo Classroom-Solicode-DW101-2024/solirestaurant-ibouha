@@ -1,27 +1,24 @@
 <?php
 require '../config.php';
 $erreurs = [];
-$lname = $fname =$email= $phone = '';
+$lname = $fname = $phone = '';
 
 
 if (isset($_POST["btnSubmit"])) {
     $fname = trim($_POST["fname"]);
-    $lname = trim($_POST["lname"]);
-    $email = trim($_POST["email"]);
-    
+    $lname = trim($_POST["lname"]);    
     $phone = trim($_POST["phone"]);
     $tel_is_exist = tel_existe($phone);
 
-    if (!empty($fname) && !empty($lname) && !empty($email) && !empty($phone) && empty($tel_is_exist)) {
-        $sql_insert_client = "INSERT INTO CLIENT VALUES(:id, :fname, :lname, :email, :phone)";
+    if (!empty($fname) && !empty($lname)  && !empty($phone) && empty($tel_is_exist)) {
+        $sql_insert_client = "INSERT INTO CLIENT VALUES(:idClient, :nomCl, :prenomCl,:telCl)";
         $stmt_insert_client = $pdo->prepare($sql_insert_client);
         $idvalue = getLastIdClient() + 1;
 
-        $stmt_insert_client->bindParam(':id', $idvalue);
-        $stmt_insert_client->bindParam(':fname', $fname);       
-        $stmt_insert_client->bindParam(':lname', $lname);
-        $stmt_insert_client->bindParam(':email',$email);      
-        $stmt_insert_client->bindParam(':phone', $phone);
+        $stmt_insert_client->bindParam(':idClient', $idvalue);
+        $stmt_insert_client->bindParam(':nomCl', $fname);       
+        $stmt_insert_client->bindParam(':prenomCl', $lname);
+        $stmt_insert_client->bindParam(':telCl', $phone);
 
         $stmt_insert_client->execute();
         header("Location:login.php");
@@ -31,12 +28,6 @@ if (isset($_POST["btnSubmit"])) {
         }
         if (empty($lname)) {
             $erreurs['lname'] = "Missing file last name.";
-        }
-        if (empty($email)){
-            $erreurs['email']="Missing file email.";
-        }
-        if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $erreurs['email'] = " entrer valid  email .";
         }
 
         if (empty($phone)) {
@@ -88,17 +79,6 @@ if (isset($_POST["btnSubmit"])) {
                         placeholder="Enter your last name"
                         >
                     <p class="text-red-500 text-sm mt-2 "><?= $erreurs['lname'] ?? '' ?></p>
-                </div>
-
-                <div>
-                    <label for="email" class="block text-rose-700 font-semibold mb-2">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-800 transition-all duration-300"
-                        placeholder="Enter your email"
-                        >
-                    <p class="text-red-500 text-sm mt-2 "><?= $erreurs['email'] ?? '' ?> </p>
                 </div>
 
                 <div>

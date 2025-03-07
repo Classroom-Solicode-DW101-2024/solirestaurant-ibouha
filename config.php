@@ -37,4 +37,24 @@ function getLastIdClient() {
         $rusult = $stmt->fetch(PDO::FETCH_ASSOC);
         return $rusult;
     }
+
+
+    function getPlatsByType($type){
+        global $pdo;
+        $sql = "SELECT * FROM plat WHERE TypeCuisine=:type";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
+        $rusult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $rusult;
+    }
+    
+    function getCuisineType(){
+        global $pdo;
+        $sql = "SELECT distinct TypeCuisine  FROM plat ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $rusult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $rusult;
+    }
 ?>
