@@ -39,7 +39,7 @@ if (isset($_POST['update_status'])) {
     $stmt = $pdo->prepare("UPDATE commande SET Statut = :newStatus WHERE idCmd = :cmdId");
     $stmt->bindParam(':newStatus', $newStatus, PDO::PARAM_STR);
     $stmt->bindParam(':cmdId', $cmdId, PDO::PARAM_STR);
-    $stmt->execute();   
+    $stmt->execute();
 }
 ?>
 
@@ -72,8 +72,8 @@ if (isset($_POST['update_status'])) {
                             <button name="logout" class="bg-rose-700 text-white py-2 px-3 rounded hover:bg-red-500">Logout</button>
                         </form>
                         <h3 class="text-3xl font-medium text-gray-700">Toutes les Commandes</h3>
-
-                        <!-- Date Filter Form -->
+                        <div class="container mx-auto p-6">
+                            <!-- Date Filter Form -->
                         <div class="mt-6 bg-white p-4 rounded shadow">
                             <h4 class="text-lg font-medium text-gray-700 mb-3">Filtrer par Date</h4>
                             <form method="GET" class="flex flex-wrap items-end gap-4">
@@ -100,37 +100,35 @@ if (isset($_POST['update_status'])) {
 
                         <div class="flex flex-col mt-8">
                             <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                                <div class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
-                                    <div class="container mx-auto p-6">
-                                        <div class="overflow-x-auto rounded-lg shadow">
-                                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                                <!-- Table Header -->
-                                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
-                                                    <tr>
-                                                        <th scope="col" class="px-6 py-3">
-                                                            idCommande
-                                                        </th>
-                                                        <th scope="col" class="px-6 py-3">Date Commande</th>
-                                                        <th scope="col" class="px-6 py-3">Status</th>
-                                                        <th scope="col" class="px-6 py-3">Client</th>
-                                                    </tr>
-                                                </thead>
+                                <div class="overflow-x-auto rounded-lg shadow">
+                                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                        <!-- Table Header -->
+                                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3">
+                                                    idCommande
+                                                </th>
+                                                <th scope="col" class="px-6 py-3">Date Commande</th>
+                                                <th scope="col" class="px-6 py-3">Status</th>
+                                                <th scope="col" class="px-6 py-3">Client</th>
+                                            </tr>
+                                        </thead>
 
-                                                <!-- Table Body -->
-                                                <tbody>
-                                                    <?php if (count($commandes) > 0) : ?>
-                                                        <?php foreach ($commandes as $commande) : ?>
-                                                            <tr class="bg-white border-b ">
-                                                                <td class="px-6 py-4">
-                                                                    <?php echo $commande['idCmd'] ?>
-                                                                </td>
-                                                                <td class="px-6 py-4">
-                                                                    <?php echo $commande['dateCmd'] ?>
-                                                                </td>
-                                                                <td class="px-6 py-4">
-                                                                    <form method="POST" class="flex items-center gap-3">
-                                                                        <input type="hidden" name="cmd_id" value="<?= htmlspecialchars($commande['idCmd']) ?>">
-                                                                        <select name="new_status" class="p-2 rounded 
+                                        <!-- Table Body -->
+                                        <tbody>
+                                            <?php if (count($commandes) > 0) : ?>
+                                                <?php foreach ($commandes as $commande) : ?>
+                                                    <tr class="bg-white border-b ">
+                                                        <td class="px-6 py-4">
+                                                            <?php echo $commande['idCmd'] ?>
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <?php echo $commande['dateCmd'] ?>
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <form method="POST" class="flex items-center gap-3">
+                                                                <input type="hidden" name="cmd_id" value="<?= htmlspecialchars($commande['idCmd']) ?>">
+                                                                <select name="new_status" class="p-2 rounded 
                                                                             <?php
                                                                             // Add different background colors based on the current status
                                                                             switch ($commande['Statut']) {
@@ -151,39 +149,40 @@ if (isset($_POST['update_status'])) {
                                                                                     break;
                                                                             }
                                                                             ?>">
-                                                                            <option value="en attente" class="bg-yellow-200 text-yellow-500" <?= ($commande['Statut'] === 'en attente') ? 'selected' : '' ?>>En attente</option>
-                                                                            <option value="en cours" class="bg-blue-200 text-blue-500" <?= ($commande['Statut'] === 'en cours') ? 'selected' : '' ?>>En cours</option>
-                                                                            <option value="expédiée" class="bg-purple-200 text-purple-500" <?= ($commande['Statut'] === 'expédiée') ? 'selected' : '' ?>>Expédiée</option>
-                                                                            <option value="livrée" class="bg-green-200 text-green-500" <?= ($commande['Statut'] === 'livrée') ? 'selected' : '' ?>>Livrée</option>
-                                                                            <option value="annulée" class="bg-red-200 text-red-500" <?= ($commande['Statut'] === 'annulée') ? 'selected' : '' ?>>Annulée</option>
-                                                                        </select>
-                                                                        <button class="p-2 text-white bg-rose-600 hover:bg-rose-400 rounded cursor-pointer" type="submit" name="update_status">Submit</button>
-                                                                    </form>
-                                                                </td>
-                                                                <td class="px-6 py-4">
-                                                                    <?php echo htmlspecialchars($commande['nomCl'] . ' ' . $commande['prenomCl']); ?>
-                                                                </td>
-                                                            </tr>
-                                                        <?php endforeach; ?>
-                                                    <?php else : ?>
-                                                        <tr class="bg-white border-b">
-                                                            <td colspan="4" class="px-6 py-4 text-center">Aucune commande trouvée pour cette période</td>
-                                                        </tr>
-                                                    <?php endif; ?>
-                                                </tbody>
-                                            </table>
+                                                                    <option value="en attente" class="bg-yellow-200 text-yellow-500" <?= ($commande['Statut'] === 'en attente') ? 'selected' : '' ?>>En attente</option>
+                                                                    <option value="en cours" class="bg-blue-200 text-blue-500" <?= ($commande['Statut'] === 'en cours') ? 'selected' : '' ?>>En cours</option>
+                                                                    <option value="expédiée" class="bg-purple-200 text-purple-500" <?= ($commande['Statut'] === 'expédiée') ? 'selected' : '' ?>>Expédiée</option>
+                                                                    <option value="livrée" class="bg-green-200 text-green-500" <?= ($commande['Statut'] === 'livrée') ? 'selected' : '' ?>>Livrée</option>
+                                                                    <option value="annulée" class="bg-red-200 text-red-500" <?= ($commande['Statut'] === 'annulée') ? 'selected' : '' ?>>Annulée</option>
+                                                                </select>
+                                                                <button class=" w-8 h-8 text-white bg-rose-600 hover:bg-rose-400 rounded cursor-pointer" type="submit" name="update_status">✓</button>
+                                                            </form>
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <?php echo htmlspecialchars($commande['nomCl'] . ' ' . $commande['prenomCl']); ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php else : ?>
+                                                <tr class="bg-white border-b">
+                                                    <td colspan="4" class="px-6 py-4 text-center">Aucune commande trouvée pour cette période</td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
 
-                                            <!-- Pagination -->
-                                            <div class="flex items-center justify-between p-4 bg-white ">
-                                                <button class="px-3 py-1 bg-gray-200 rounded">Previous</button>
-                                                <span class="text-sm text-gray-700 dark:text-gray-400">Page 1 of 10</span>
-                                                <button class="px-3 py-1 bg-gray-200 rounded">Next</button>
-                                            </div>
-                                        </div>
+                                    <!-- Pagination -->
+                                    <div class="flex items-center justify-between p-4 bg-white ">
+                                        <button class="px-3 py-1 bg-gray-200 rounded">Previous</button>
+                                        <span class="text-sm text-gray-700 dark:text-gray-400">Page 1 of 10</span>
+                                        <button class="px-3 py-1 bg-gray-200 rounded">Next</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        </div>
+
+                        
                     </div>
                 </main>
             </div>

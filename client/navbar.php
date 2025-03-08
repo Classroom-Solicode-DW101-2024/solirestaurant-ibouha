@@ -25,9 +25,12 @@
     </button>
     
     <ul class="hidden md:flex items-center gap-x-8">
-        <li><a href="#" class="block px-4 py-2 hover:text-rose-700">Home</a></li>
+        <li><a href="index.php" class="block px-4 py-2 hover:text-rose-700">Home</a></li>
         <li><a href="#" class="block px-4 py-2">About</a></li>
         <li><a href="#" class="block px-4 py-2">Services</a></li>
+        <?php if (isset($_SESSION['client'])): ?>
+            <li><a href="commandes.php" class="block px-4 py-2">mes commandes</a></li>            
+        <?php endif; ?>
         <li><a href="#" class="block px-4 py-2">Contact</a></li>
     </ul>
     
